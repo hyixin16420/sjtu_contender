@@ -1,20 +1,26 @@
 #include "TicketEngine.h"
+
+// WebView2 的底层是微软的 COM 技术。COM 对象的内存管理非常麻烦，Microsoft::WRL：这是微软提供的模板库，里面包含了帮我们自动管理 COM 内存的工具
 #include <wrl.h>
 #include <wil/com.h>
 #include "WebView2.h"
 
 using namespace Microsoft::WRL;
 
-// 类的成员变量（代替之前的全局变量）
-ComPtr<ICoreWebView2Controller> m_controller;
-ComPtr<ICoreWebView2> m_webview;
-TicketEngine::LogCallback m_logCallback;
+// 类的成员变量
+//智能指针，控制的浏览器组件就能活着，可以自动销毁浏览器
+ComPtr<ICoreWebView2Controller> m_controller;   //负责外部，软件窗口多大，什么位置，怎么响应鼠标和键盘
+ComPtr<ICoreWebView2> m_webview;               //负责内部，加载什么网址，执行什么代码，网页有没有加载完
+TicketEngine::LogCallback m_logCallback;        //负责把底层的事情汇报给UI界面
 
+
+//创建底层环境
 bool TicketEngine::InitializeBrowser(HWND browserContainerHwnd) {
+	//把底层引擎跑起来
 	CreateCoreWebView2EnvironmentWithOptions(nullptr, nullptr, nullptr,
 		Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
 			[this, browserContainerHwnd](HRESULT result, ICoreWebView2Environment* env) -> HRESULT {
-
+//创建窗口控制器
 				env->CreateCoreWebView2Controller(browserContainerHwnd, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
 					[this, browserContainerHwnd](HRESULT result, ICoreWebView2Controller* controller) -> HRESULT {
 
