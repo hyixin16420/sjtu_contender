@@ -165,8 +165,13 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="sjtu_contender\TicketEngine.cpp" />
+    <ClCompile Include="sjtu_contender\TicketSniper.cpp" />
+    <ClCompile Include="src\WindowUI\basic_window.cpp" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ClInclude Include="src\TicketEngine.h" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:\Users\FNP20\source\repos\sjtu_contender\ZERO_CHECK.vcxproj">
       <Project>{D0508358-A7DC-3F73-AFDC-B4B3729D3C59}</Project>

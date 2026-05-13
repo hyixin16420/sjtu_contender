@@ -4,5 +4,30 @@
     <CustomBuild Include="C:\Users\FNP20\source\repos\sjtu_contender\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{bb281452-43ba-41bb-bf50-3382830637cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sjtu_contender">
+      <UniqueIdentifier>{fc0cd7f3-9908-4d3e-b890-f4fad763e09f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\WindowUI">
+      <UniqueIdentifier>{d70bd056-329a-496c-a011-078230371832}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="sjtu_contender\TicketEngine.cpp">
+      <Filter>sjtu_contender</Filter>
+    </ClCompile>
+    <ClCompile Include="sjtu_contender\TicketSniper.cpp">
+      <Filter>sjtu_contender</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WindowUI\basic_window.cpp">
+      <Filter>src\WindowUI</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\TicketEngine.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
