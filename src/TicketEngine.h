@@ -8,6 +8,7 @@
 
 class TicketEngine {
 public:
+	static TicketEngine& instance();
 	/**
 	* 1. 生命周期与窗口绑定
 	*/
@@ -37,6 +38,7 @@ public:
 	void SetLogCallback(LogCallback callback);
 
 private:
+	TicketEngine() {}
 	Microsoft::WRL::ComPtr<ICoreWebView2Controller>m_controller;
 	Microsoft::WRL::ComPtr<ICoreWebView2>m_webview;
 	LogCallback m_logCallback;

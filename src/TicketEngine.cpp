@@ -1,9 +1,15 @@
 #include "TicketEngine.h"
+#include <wil/com.h>
 
 #include <fstream>
 #include <sstream>
 
 using namespace Microsoft::WRL;
+
+TicketEngine& TicketEngine::instance() {
+	static TicketEngine ins;
+	return ins;
+}
 
 //创建底层环境
 bool TicketEngine::InitializeBrowser(HWND browserContainerHwnd) {

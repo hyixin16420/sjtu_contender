@@ -1,14 +1,23 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
+#include "../TicketEngine.h"
+
 LRESULT WINAPI WndProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam) {
 	switch (Msg) {
+	case WM_CREATE:
+		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
 	default: break;
 	}
 	return DefWindowProc(hWnd, Msg, wParam, lParam);
+}
+void LogCallback(const std::wstring& message) {
+	OutputDebugString(message.c_str());
+	OutputDebugString(TEXT("\n"));
+	return;
 }
 
 int WINAPI WinMain(
@@ -45,6 +54,11 @@ int WINAPI WinMain(
 
 	ShowWindow(hWnd, nShowCmd);
 	UpdateWindow(hWnd);
+
+	TicketEngine::instance().SetLogCallback(LogCallback);
+	TicketEngine::instance().InitializeBrowser(hWnd);
+	TicketEngine::instance().OnResize(800, 600);
+	
 
 	MSG msg = {};
 	while (GetMessage(&msg, nullptr, 0, 0)) {
