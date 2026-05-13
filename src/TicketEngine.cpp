@@ -110,3 +110,22 @@ void TicketEngine::StartSnappingFromFile(const std::wstring& filePath) {
 	// 将读取到的纯文本代码注入浏览器
 	m_webview->ExecuteScript(jsCode.c_str(), Callback<...>(...).Get());
 }
+
+void TicketEngine::StopSnapping() {
+	// 1. 安全检查：确保浏览器已经初始化
+	if (m_webview == nullptr) {
+		if (m_logCallback) m_logCallback(L"浏览器未就绪，无需停止。");
+		return;
+	}
+
+	// 2. 编写刹车指令：把 JS 里的开关关掉，并清理定时器
+	LPCWSTR stopScript = L"window.isSnapping = false; if(window.snappingTimer) clearInterval(window.snappingTimer);";
+
+	// 3. 发射刹车指令
+	m_webview->ExecuteScript(stopScript, Callback<ICoreWebView2ExecuteScriptCompletedHandler>(
+		[this](HRESULT errorCode, LPCWSTR resultObjectAsJson) -> HRESULT {
+			if (m_logCallback) m_logCallback(L"🛑 抢票脚本已成功停止！");
+			return S_OK;
+		}
+	).Get());
+}

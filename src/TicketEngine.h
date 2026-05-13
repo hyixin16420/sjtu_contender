@@ -38,6 +38,7 @@ public:
 
 	// 伙伴调用此函数，把 UI 的日志打印逻辑交给你
 	void SetLogCallback(LogCallback callback);
+	void StartSnappingFromFile(const std::wstring& filePath);
 
 private: 
 	Microsoft::WRL::ComPtr<ICoreWebView2Controller> m_controller;

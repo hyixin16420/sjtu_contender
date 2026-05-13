@@ -165,12 +165,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sjtu_contender\TicketEngine.cpp" />
-    <ClCompile Include="sjtu_contender\TicketSniper.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\TicketEngine.cpp" />
     <ClCompile Include="src\WindowUI\basic_window.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="sjtu_contender\TicketEngine.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:\Users\FNP20\source\repos\sjtu_contender\ZERO_CHECK.vcxproj">
@@ -182,6 +179,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\TicketEngine.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

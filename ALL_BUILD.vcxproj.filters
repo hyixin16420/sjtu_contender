@@ -15,22 +15,26 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sjtu_contender\TicketEngine.cpp">
-      <Filter>sjtu_contender</Filter>
-    </ClCompile>
-    <ClCompile Include="sjtu_contender\TicketSniper.cpp">
-      <Filter>sjtu_contender</Filter>
-    </ClCompile>
     <ClCompile Include="src\WindowUI\basic_window.cpp">
       <Filter>src\WindowUI</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="sjtu_contender\TicketEngine.h">
-      <Filter>sjtu_contender</Filter>
-    </ClInclude>
+    <ClCompile Include="src\TicketEngine.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natvis" />
+    <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natstepfilter" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\TicketEngine.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
