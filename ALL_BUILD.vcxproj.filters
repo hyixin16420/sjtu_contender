@@ -26,8 +26,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\TicketEngine.h">
-      <Filter>src</Filter>
+    <ClInclude Include="sjtu_contender\TicketEngine.h">
+      <Filter>sjtu_contender</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
