@@ -1,0 +1,80 @@
+# 构建输出和编译中间文件
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+ARM/
+ARM64/
+bld/
+[Ll]og/
+[Ll]ogs/
+*.obj
+*.exe
+*.dll
+*.so
+*.lib
+*.a
+*.pdb
+*.ilk
+
+# Visual Studio 用户特定和缓存文件
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.sdf
+*.VC.db
+*.VC.VC.opendb
+ipch/
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.cachefile
+*.tlog
+
+# 预编译头文件
+*.pch
+*.gch
+
+# 其他临时文件和日志
+*.log
+*.tmp
+*.pidb
+*.svclog
+*.scc
+*.vspscc
+.vssscc
+*.pidb
+
+# 项目管理
+packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+
+# 适用于 C++ 的通用规则
+*.d
+*.slo
+*.lo
+*.o
+
+# Windows 系统文件
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.lnk
+
+# 其他工具链
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
+.idea/
