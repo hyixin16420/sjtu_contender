@@ -1,0 +1,17 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "vs2026-debug",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "vs2026-release",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "cacheVariables": {"CMAKE_BUILD_TYPE": "Release"}
+    }
+  ]
+}
