@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="sjtu_contender.vcxproj" Id="05a944f2-bac0-4978-a21e-f030f15d503e" />
+</Solution>
