@@ -55,9 +55,9 @@ int WINAPI WinMain(
 	ShowWindow(hWnd, nShowCmd);
 	UpdateWindow(hWnd);
 
-	TicketEngine::instance().SetLogCallback(LogCallback);
-	TicketEngine::instance().InitializeBrowser(hWnd);
-	TicketEngine::instance().OnResize(800, 600);
+	//TicketEngine::instance().SetLogCallback(LogCallback);
+	//TicketEngine::instance().InitializeBrowser(hWnd);
+	//TicketEngine::instance().OnResize(800, 600);
 	
 
 	MSG msg = {};
