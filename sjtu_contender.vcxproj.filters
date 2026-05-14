@@ -4,32 +4,59 @@
     <Filter Include="src">
       <UniqueIdentifier>{55eae0d2-0548-4bc9-b558-4f7f6bef5562}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\WindowUI">
+    <Filter Include="src\Basic">
+      <UniqueIdentifier>{6c5cb3cc-9859-4a5e-a260-9c690f94fa0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Window">
       <UniqueIdentifier>{62b8943c-0e69-4b74-9fc5-0895bb6316b4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\WindowUI\basic_window.cpp">
-      <Filter>src\WindowUI</Filter>
-    </ClCompile>
     <ClCompile Include="src\TicketEngine.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Basic\CheckFailure.cpp">
+      <Filter>src\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Basic\pch.cpp">
+      <Filter>src\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Window\base_window.cpp">
+      <Filter>src\Window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include=".gitignore" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\TicketEngine.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\Basic\CheckFailure.h">
+      <Filter>src\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Basic\pch.h">
+      <Filter>src\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Window\resource.h">
+      <Filter>src\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Window\window_messages.h">
+      <Filter>src\Window</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natvis" />
     <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natstepfilter" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\Window\Resource.rc">
+      <Filter>src\Window</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

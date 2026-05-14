@@ -1,4 +1,5 @@
 #pragma once
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <wrl.h>
 #include <WebView2.h>
@@ -13,9 +14,9 @@ public:
 	* 1. 生命周期与窗口绑定
 	*/
 	// UI 初始化完成后调用，传入用来显示网页的控件句柄
-	bool InitializeBrowser(HWND browserContainerHwnd);
+	void InitializeBrowser(HWND browserContainerHwnd);
 	// UI 窗口大小改变时调用，防止网页尺寸错乱
-	void OnResize(int width, int height);
+	void OnResize(RECT bounds);
 
 	/**
 	* 2. UI控制指令
@@ -39,7 +40,9 @@ public:
 
 private:
 	TicketEngine() {}
-	Microsoft::WRL::ComPtr<ICoreWebView2Controller>m_controller;
-	Microsoft::WRL::ComPtr<ICoreWebView2>m_webview;
+
+	wil::com_ptr<ICoreWebView2Environment>m_webviewEnvironment; // 环境
+	wil::com_ptr<ICoreWebView2Controller>m_controller; // 控制器
+	wil::com_ptr<ICoreWebView2>m_webview; // 核心视图
 	LogCallback m_logCallback;
 };

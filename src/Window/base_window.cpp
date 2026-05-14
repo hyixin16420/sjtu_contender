@@ -1,12 +1,26 @@
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include "Basic/pch.h"
+#include "Basic/CheckFailure.h"
 
-#include "../TicketEngine.h"
+#include "resource.h"
+#include "window_messages.h"
+#include "TicketEngine.h"
 
 LRESULT WINAPI WndProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam) {
 	switch (Msg) {
 	case WM_CREATE:
 		break;
+
+	case WM_WEBVIEWINITIALIZED:
+		TicketEngine::instance().NavigateTo(L"https://www.bing.com/");
+		break;
+	case WM_SIZE: {
+		RECT bounds = {};
+		GetClientRect(hWnd, &bounds);
+		TicketEngine::instance().OnResize(bounds);
+		break;
+	}
+
+
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
@@ -26,7 +40,10 @@ int WINAPI WinMain(
 	_In_ LPSTR lpCmdLine,
 	_In_ int nShowCmd) {
 	UNREFERENCED_PARAMETER(hPrevInstance);
-	const TCHAR CLASS_NAME[] = TEXT("SJTU_CONTENDER");
+	CHECK_FAILURE(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED));
+	TCHAR CLASS_NAME[16] = {}, WINDOW_NAME[128] = {};
+	LoadString(hInstance, IDS_CLASSNAME, CLASS_NAME, 16);
+	LoadString(hInstance, IDS_WINDOWNAME, WINDOW_NAME, 128);
 
 	WNDCLASSEX wc = {};
 	wc.cbSize = sizeof(WNDCLASSEX);
@@ -35,30 +52,21 @@ int WINAPI WinMain(
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wc.hbrBackground = reinterpret_cast<HBRUSH>(GetStockObject(WHITE_BRUSH));
 	wc.lpszClassName = CLASS_NAME;
-
-	if (!RegisterClassEx(&wc)) {
-		MessageBox(nullptr, TEXT("Register window class failed!"), TEXT("Error"), MB_OK);
-		return 0;
-	}
+	CHECK_FAILURE_BOOL(RegisterClassEx(&wc));
 
 	HWND hWnd = CreateWindow(
-		CLASS_NAME, TEXT("Basic Window"), WS_OVERLAPPEDWINDOW,
+		CLASS_NAME, WINDOW_NAME, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, 800, 600,
 		nullptr, nullptr, hInstance, nullptr
 	);
-	if (!hWnd) {
-		UnregisterClass(CLASS_NAME, hInstance);
-		MessageBox(nullptr, TEXT("Window creation failed!"), TEXT("Error"), MB_OK);
-		return 0;
+	CHECK_FAILURE_BOOL(hWnd);
+	if (true && hWnd) {
+		ShowWindow(hWnd, nShowCmd);
+		UpdateWindow(hWnd);
 	}
 
-	ShowWindow(hWnd, nShowCmd);
-	UpdateWindow(hWnd);
-
-	//TicketEngine::instance().SetLogCallback(LogCallback);
-	//TicketEngine::instance().InitializeBrowser(hWnd);
-	//TicketEngine::instance().OnResize(800, 600);
-	
+	TicketEngine::instance().SetLogCallback(LogCallback);
+	TicketEngine::instance().InitializeBrowser(hWnd);
 
 	MSG msg = {};
 	while (GetMessage(&msg, nullptr, 0, 0)) {
@@ -66,5 +74,6 @@ int WINAPI WinMain(
 		DispatchMessage(&msg);
 	}
 	UnregisterClass(CLASS_NAME, hInstance);
+	CoUninitialize();
 	return static_cast<int>(msg.wParam);
 }

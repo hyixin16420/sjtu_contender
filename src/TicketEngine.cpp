@@ -1,4 +1,9 @@
+#include "Basic/pch.h"
+#include "Basic/CheckFailure.h"
+
 #include "TicketEngine.h"
+#include "Window/window_messages.h"
+#include <WebView2EnvironmentOptions.h>
 #include <wil/com.h>
 
 #include <fstream>
@@ -12,52 +17,74 @@ TicketEngine& TicketEngine::instance() {
 }
 
 //创建底层环境
-bool TicketEngine::InitializeBrowser(HWND browserContainerHwnd) {
+void TicketEngine::InitializeBrowser(HWND browserContainerHwnd) {
+	auto options = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
 	//把底层引擎跑起来
-	CreateCoreWebView2EnvironmentWithOptions(nullptr, nullptr, nullptr,
+	CHECK_FAILURE(CreateCoreWebView2EnvironmentWithOptions(nullptr, nullptr, options.Get(),
 		Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
 			[this, browserContainerHwnd](HRESULT result, ICoreWebView2Environment* env) -> HRESULT {
-				//创建窗口控制器：与UI窗口绑定在一起，生成一个控制器
-				env->CreateCoreWebView2Controller(browserContainerHwnd, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
-					[this, browserContainerHwnd](HRESULT result, ICoreWebView2Controller* controller) -> HRESULT {
+				m_webviewEnvironment = env;
 
-						if (controller != nullptr) {
-							m_controller = controller;//保存控制器遥控
-							m_controller->get_CoreWebView2(&m_webview);   //拿到视图遥控器
+				//创建窗口控制器：与UI窗口绑定在一起，生成一个控制器
+				env->CreateCoreWebView2Controller(
+					browserContainerHwnd, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
+					[this, browserContainerHwnd](HRESULT result, ICoreWebView2Controller* controller) -> HRESULT {
+						if (controller) {
+							(m_controller = controller)->get_CoreWebView2(&m_webview);
 						}
 
+						// 对webview进行一些设置
+						wil::com_ptr<ICoreWebView2Settings>settings;
+						m_webview->get_Settings(&settings);
+						settings->put_IsScriptEnabled(TRUE);
+						settings->put_AreDefaultScriptDialogsEnabled(TRUE);
+						settings->put_IsWebMessageEnabled(TRUE);
+
 						// 初始调整大小
-						RECT bounds;
-						GetClientRect(browserContainerHwnd, &bounds);//测量窗口有多大
+						RECT bounds = {};
+						GetClientRect(browserContainerHwnd, &bounds);
 						m_controller->put_Bounds(bounds); //让浏览器画面撑满整个窗口
+
+						EventRegistrationToken token;
 
 						// 注册导航完成的监听器
 						m_webview->add_NavigationCompleted(
 							Callback<ICoreWebView2NavigationCompletedEventHandler>(
 								[this](ICoreWebView2* sender, ICoreWebView2NavigationCompletedEventArgs* args) -> HRESULT {
 									BOOL success;
-									args->get_IsSuccess(&success);//问系统是否打开网页了？
+									args->get_IsSuccess(&success);
 									if (success && m_logCallback) {
 										m_logCallback(TEXT("网页加载完成，准备就绪！"));  //通过对讲机向UI汇报
 									}
 									return S_OK;
-								}).Get(), nullptr);
+								}).Get(), &token);
 
+						m_webview->add_WebMessageReceived(
+							Callback<ICoreWebView2WebMessageReceivedEventHandler>(
+								[](ICoreWebView2* webview, ICoreWebView2WebMessageReceivedEventArgs* args) -> HRESULT {
+									wil::unique_cotaskmem_string message;
+									args->TryGetWebMessageAsString(&message);
+									// processMessage(&message);
+
+									webview->PostWebMessageAsString(message.get());
+									return S_OK;
+								}).Get(), &token);
+
+						PostMessage(browserContainerHwnd, WM_WEBVIEWINITIALIZED, 0, 0);
 						return S_OK;
 					}).Get());
 				return S_OK;
-			}).Get());
-
-	return true;
+			}).Get()));
+	return;
 }
 
 //日常维护与控制
 //窗口自适应（用户可以随时放大缩小网页大小）
-void TicketEngine::OnResize(int width, int height) {
+void TicketEngine::OnResize(RECT bounds) {
 	if (m_controller != nullptr) {
-		RECT bounds = { 0, 0, width, height };
 		m_controller->put_Bounds(bounds);
 	}
+	return;
 }
 
 //导航跳转
@@ -66,6 +93,7 @@ void TicketEngine::NavigateTo(const std::wstring& url) {
 		m_webview->Navigate(url.c_str());
 		if (m_logCallback) m_logCallback(TEXT("正在跳转至: ") + url);
 	}
+	return;
 }
 
 
@@ -82,6 +110,7 @@ void TicketEngine::StartSnapping(const std::wstring& targetTime, int retryInterv
 				return S_OK;
 			}).Get());
 	}
+	return;
 }
 
 // 读取外部 JS 文件并注入
@@ -98,6 +127,7 @@ void TicketEngine::StartSnappingFromFile(const std::wstring& filePath) {
 
 	// 将读取到的纯文本代码注入浏览器
 	// m_webview->ExecuteScript(jsCode.c_str(), Callback<...>(...).Get());
+	return;
 }
 
 void TicketEngine::StopSnapping() {
@@ -117,10 +147,12 @@ void TicketEngine::StopSnapping() {
 			return S_OK;
 		}
 	).Get());
+	return;
 }
 
 //与UI连接
 void TicketEngine::SetLogCallback(LogCallback callback) {
 	m_logCallback = callback;
+	return;
 }
 
