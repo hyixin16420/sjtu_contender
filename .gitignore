@@ -52,7 +52,6 @@ ipch/
 
 # 项目管理
 packages/
-packages.config
 *.nupkg
 project.lock.json
 project.fragment.lock.json
