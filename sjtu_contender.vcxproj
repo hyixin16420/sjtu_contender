@@ -45,6 +45,11 @@
   <ItemGroup>
     <ResourceCompile Include="src\Window\Resource.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="sjtu_contender.ico" />
+    <Image Include="sjtu_contender1.ico" />
+    <Image Include="src\Window\sjtu_contender.ico" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

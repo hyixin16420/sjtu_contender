@@ -11,7 +11,7 @@ LRESULT WINAPI WndProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ L
 		break;
 
 	case WM_WEBVIEWINITIALIZED:
-		TicketEngine::instance().NavigateTo(L"https://www.bing.com/");
+		TicketEngine::instance().NavigateTo(L"https://my.sjtu.edu.cn/ui/task?by=history&from=kkframenew");
 		break;
 	case WM_SIZE: {
 		RECT bounds = {};
@@ -50,6 +50,7 @@ int WINAPI WinMain(
 	wc.lpfnWndProc = WndProc;
 	wc.hInstance = hInstance;
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wc.hIcon = wc.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 	wc.hbrBackground = reinterpret_cast<HBRUSH>(GetStockObject(WHITE_BRUSH));
 	wc.lpszClassName = CLASS_NAME;
 	CHECK_FAILURE_BOOL(RegisterClassEx(&wc));

@@ -4,6 +4,7 @@
 //
 #define IDS_CLASSNAME                   101
 #define IDS_WINDOWNAME                  102
+#define IDI_ICON1                       103
 
 // Next default values for new objects
 // 

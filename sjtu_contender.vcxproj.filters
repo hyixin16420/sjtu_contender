@@ -59,4 +59,9 @@
       <Filter>src\Window</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="sjtu_contender1.ico" />
+    <Image Include="sjtu_contender.ico" />
+    <Image Include="src\Window\sjtu_contender.ico" />
+  </ItemGroup>
 </Project>
