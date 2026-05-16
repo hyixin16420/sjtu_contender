@@ -7,21 +7,17 @@
 
 TicketEngine* gTicketEngine = nullptr;
 
-void LogCallback(const std::wstring& message) {
-	OutputDebugString(message.c_str());
-	OutputDebugString(TEXT("\n"));
-	return;
-}
 LRESULT WINAPI WndProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam) {
 	switch (Msg) {
 	case WM_CREATE: {
 		gTicketEngine = &TicketEngine::instance();
-		gTicketEngine->SetLogCallback(LogCallback);
 		gTicketEngine->InitializeBrowser(hWnd);
 		break;
 	}
+
 	case WM_WEBVIEWINITIALIZED: {
 		gTicketEngine->NavigateTo(L"https://my.sjtu.edu.cn/");
+		// gTicketEngine->NavigateTo(L"");
 		break;
 	}
 	case WM_SIZE: {
@@ -30,8 +26,27 @@ LRESULT WINAPI WndProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ L
 		gTicketEngine->OnResize(bounds);
 		break;
 	}
+	case WM_KEYDOWN: {
+		if (wParam == VK_SPACE) {
+			gTicketEngine->ExecuteScript(
+				LR"(
+				(function() {
+					let input = document.querySelector('#');
+					if(!input) return false;
+					input.focus();
+					input.value = 'Cassiel_Fang';
+					input.dispatchEvent(new Event('input', { bubbles: true })); // 触发 JS 监听
+					return true;
+				})()
+			)"
+			);
+		}
+		break;
+	}
+
 	case WM_CLOSE: {
 		gTicketEngine->OnClose();
+		gTicketEngine = nullptr;
 		DestroyWindow(hWnd);
 		break;
 	}
@@ -75,16 +90,12 @@ int WINAPI WinMain(
 		UpdateWindow(hWnd);
 	}
 
-	TicketEngine::instance().SetLogCallback(LogCallback);
-	TicketEngine::instance().InitializeBrowser(hWnd);
-
 	MSG msg = {};
 	while (GetMessage(&msg, nullptr, 0, 0)) {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
 
-	gTicketEngine = nullptr;
 	UnregisterClass(CLASS_NAME, hInstance);
 	CoUninitialize();
 	return static_cast<int>(msg.wParam);

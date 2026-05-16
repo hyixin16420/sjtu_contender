@@ -24,6 +24,8 @@ public:
 	*/
 	// 导航到指定网址
 	void NavigateTo(const std::wstring& url);
+	// 临时用于JS指令测试
+	void ExecuteScript(const std::wstring& script);
 	// 启动抢票任务 (可传入UI界面上填写的参数）
 	void StartSnapping(const std::wstring& targetTime, int retryIntervalMs);
 
@@ -34,15 +36,12 @@ public:
 	/**
 	* 3. 日志反馈回调
 	*/
-	// 定义回调函数类型
-	using LogCallback = std::function<void(const std::wstring& message)>;
-	// 指派回调函数
-	void SetLogCallback(LogCallback callback);
 	// 输出日志
-	void LogOut(const std::wstring& message);
+	void LogOut(const std::wstring& message, const wchar_t* endc = L"\n");
 
 private:
-	TicketEngine() = default;
+	TicketEngine();
+	~TicketEngine();
 	TicketEngine(const TicketEngine&) = delete;
 	TicketEngine& operator=(const TicketEngine&) = delete;
 	TicketEngine(TicketEngine&&) = delete;
@@ -56,6 +55,4 @@ private:
 
 	EventRegistrationToken m_TokenNavigationCompleted;
 	EventRegistrationToken m_TokenWebMessageReceived;
-
-	LogCallback m_logCallback;
 };
