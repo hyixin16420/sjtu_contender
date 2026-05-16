@@ -18,7 +18,9 @@ TicketEngine& TicketEngine::instance() {
 
 //创建底层环境
 void TicketEngine::InitializeBrowser(HWND browserContainerHwnd) {
-	if (m_initialized) return;
+	if (m_initialized) {
+		return;
+	}
 	m_initialized = true;
 
 	auto options = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
@@ -53,8 +55,6 @@ void TicketEngine::InitializeBrowser(HWND browserContainerHwnd) {
 						GetClientRect(browserContainerHwnd, &bounds);
 						m_controller->put_Bounds(bounds); //让浏览器画面撑满整个窗口
 
-						EventRegistrationToken token;
-
 						// 注册导航完成的监听器
 						m_webview->add_NavigationCompleted(
 							Callback<ICoreWebView2NavigationCompletedEventHandler>(
@@ -65,18 +65,17 @@ void TicketEngine::InitializeBrowser(HWND browserContainerHwnd) {
 										m_logCallback(TEXT("网页加载完成，准备就绪！"));  //通过对讲机向UI汇报
 									}
 									return S_OK;
-								}).Get(), &token);
+								}).Get(), &m_TokenNavigationCompleted);
 
 						m_webview->add_WebMessageReceived(
 							Callback<ICoreWebView2WebMessageReceivedEventHandler>(
-								[](ICoreWebView2* webview, ICoreWebView2WebMessageReceivedEventArgs* args) -> HRESULT {
+								[this](ICoreWebView2* webview, ICoreWebView2WebMessageReceivedEventArgs* args) -> HRESULT {
 									wil::unique_cotaskmem_string message;
 									args->TryGetWebMessageAsString(&message);
 									// processMessage(&message);
-
 									webview->PostWebMessageAsString(message.get());
 									return S_OK;
-								}).Get(), &token);
+								}).Get(), &m_TokenWebMessageReceived);
 
 						PostMessage(browserContainerHwnd, WM_WEBVIEWINITIALIZED, 0, 0);
 						return S_OK;
@@ -97,6 +96,10 @@ void TicketEngine::OnResize(RECT bounds) {
 
 // 窗口关闭时的资源清理
 void TicketEngine::OnClose() {
+	if (m_webview) {
+		m_webview->remove_NavigationCompleted(m_TokenNavigationCompleted);
+		m_webview->remove_WebMessageReceived(m_TokenWebMessageReceived);
+	}
 	m_webview.reset();
 	m_controller.reset();
 	m_environment.reset();
@@ -166,9 +169,13 @@ void TicketEngine::StopSnapping() {
 	return;
 }
 
-//与UI连接
 void TicketEngine::SetLogCallback(LogCallback callback) {
 	m_logCallback = callback;
 	return;
 }
-
+void TicketEngine::LogOut(const std::wstring& message) {
+	if (m_logCallback) {
+		m_logCallback(message);
+	}
+	return;
+}

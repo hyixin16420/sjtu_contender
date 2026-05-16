@@ -21,7 +21,7 @@ LRESULT WINAPI WndProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ L
 		break;
 	}
 	case WM_WEBVIEWINITIALIZED: {
-		gTicketEngine->NavigateTo(L"https://my.sjtu.edu.cn/ui/task?by=history&from=kkframenew");
+		gTicketEngine->NavigateTo(L"https://my.sjtu.edu.cn/");
 		break;
 	}
 	case WM_SIZE: {

@@ -32,12 +32,14 @@ public:
 	void StopSnapping();
 
 	/**
-	* 3. 状态反馈回调
+	* 3. 日志反馈回调
 	*/
 	// 定义回调函数类型
 	using LogCallback = std::function<void(const std::wstring& message)>;
 	// 指派回调函数
 	void SetLogCallback(LogCallback callback);
+	// 输出日志
+	void LogOut(const std::wstring& message);
 
 private:
 	TicketEngine() = default;
@@ -51,5 +53,9 @@ private:
 	wil::com_ptr<ICoreWebView2Environment>m_environment; // 环境
 	wil::com_ptr<ICoreWebView2Controller>m_controller; // 控制器
 	wil::com_ptr<ICoreWebView2>m_webview; // 核心视图
+
+	EventRegistrationToken m_TokenNavigationCompleted;
+	EventRegistrationToken m_TokenWebMessageReceived;
+
 	LogCallback m_logCallback;
 };
