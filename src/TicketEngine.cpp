@@ -18,17 +18,25 @@ TicketEngine& TicketEngine::instance() {
 
 //创建底层环境
 void TicketEngine::InitializeBrowser(HWND browserContainerHwnd) {
+	if (m_initialized) return;
+	m_initialized = true;
+
 	auto options = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
 	//把底层引擎跑起来
 	CHECK_FAILURE(CreateCoreWebView2EnvironmentWithOptions(nullptr, nullptr, options.Get(),
 		Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
 			[this, browserContainerHwnd](HRESULT result, ICoreWebView2Environment* env) -> HRESULT {
-				m_webviewEnvironment = env;
+				m_environment = env;
 
 				//创建窗口控制器：与UI窗口绑定在一起，生成一个控制器
 				env->CreateCoreWebView2Controller(
 					browserContainerHwnd, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
 					[this, browserContainerHwnd](HRESULT result, ICoreWebView2Controller* controller) -> HRESULT {
+						if (m_webview) {
+								return S_OK; // 已经初始化过了，跳过
+						}
+
+						CHECK_FAILURE_BOOL(controller);
 						if (controller) {
 							(m_controller = controller)->get_CoreWebView2(&m_webview);
 						}
@@ -84,6 +92,14 @@ void TicketEngine::OnResize(RECT bounds) {
 	if (m_controller != nullptr) {
 		m_controller->put_Bounds(bounds);
 	}
+	return;
+}
+
+// 窗口关闭时的资源清理
+void TicketEngine::OnClose() {
+	m_webview.reset();
+	m_controller.reset();
+	m_environment.reset();
 	return;
 }
 

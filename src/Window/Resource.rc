@@ -63,7 +63,7 @@ IDI_ICON1               ICON                    "sjtu_contender.ico"
 STRINGTABLE
 BEGIN
     IDS_CLASSNAME           "SJTU_CONTENDER"
-    IDS_WINDOWNAME          "Windows窗口"
+    IDS_WINDOWNAME          "主窗口"
 END
 
 #endif    // 中文(简体，中国) resources

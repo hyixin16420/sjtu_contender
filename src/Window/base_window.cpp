@@ -5,33 +5,42 @@
 #include "window_messages.h"
 #include "TicketEngine.h"
 
+TicketEngine* gTicketEngine = nullptr;
+
+void LogCallback(const std::wstring& message) {
+	OutputDebugString(message.c_str());
+	OutputDebugString(TEXT("\n"));
+	return;
+}
 LRESULT WINAPI WndProc(_In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM wParam, _In_ LPARAM lParam) {
 	switch (Msg) {
-	case WM_CREATE:
+	case WM_CREATE: {
+		gTicketEngine = &TicketEngine::instance();
+		gTicketEngine->SetLogCallback(LogCallback);
+		gTicketEngine->InitializeBrowser(hWnd);
 		break;
-
-	case WM_WEBVIEWINITIALIZED:
-		TicketEngine::instance().NavigateTo(L"https://my.sjtu.edu.cn/ui/task?by=history&from=kkframenew");
+	}
+	case WM_WEBVIEWINITIALIZED: {
+		gTicketEngine->NavigateTo(L"https://my.sjtu.edu.cn/ui/task?by=history&from=kkframenew");
 		break;
+	}
 	case WM_SIZE: {
 		RECT bounds = {};
 		GetClientRect(hWnd, &bounds);
-		TicketEngine::instance().OnResize(bounds);
+		gTicketEngine->OnResize(bounds);
 		break;
 	}
-
-
+	case WM_CLOSE: {
+		gTicketEngine->OnClose();
+		DestroyWindow(hWnd);
+		break;
+	}
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
 	default: break;
 	}
 	return DefWindowProc(hWnd, Msg, wParam, lParam);
-}
-void LogCallback(const std::wstring& message) {
-	OutputDebugString(message.c_str());
-	OutputDebugString(TEXT("\n"));
-	return;
 }
 
 int WINAPI WinMain(
@@ -74,6 +83,8 @@ int WINAPI WinMain(
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
+
+	gTicketEngine = nullptr;
 	UnregisterClass(CLASS_NAME, hInstance);
 	CoUninitialize();
 	return static_cast<int>(msg.wParam);

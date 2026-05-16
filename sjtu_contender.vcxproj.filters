@@ -32,6 +32,7 @@
     <None Include="packages.config" />
     <None Include=".gitignore" />
     <None Include="README.md" />
+    <None Include="project.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\TicketEngine.h">
