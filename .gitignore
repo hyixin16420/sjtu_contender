@@ -78,3 +78,6 @@ cmake_install.cmake
 Makefile
 compile_commands.json
 .idea/
+
+# 个性化排除
+include/

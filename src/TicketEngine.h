@@ -3,12 +3,15 @@
 #include <Windows.h>
 #include <wrl.h>
 #include <WebView2.h>
+#include <opencv2/core/mat.hpp>
 
 #include <string>
 #include <functional>
 
 class TicketEngine {
 public:
+	static void create();
+	static void destroy();
 	static TicketEngine& instance();
 	/**
 	* 1. 生命周期与窗口绑定
@@ -24,6 +27,8 @@ public:
 	*/
 	// 导航到指定网址
 	void NavigateTo(const std::wstring& url);
+	// 截图
+	void Capture(cv::Mat& mat);
 	// 临时用于JS指令测试
 	void ExecuteScript(const std::wstring& script);
 	// 启动抢票任务 (可传入UI界面上填写的参数）
@@ -47,12 +52,14 @@ private:
 	TicketEngine(TicketEngine&&) = delete;
 	TicketEngine& operator=(TicketEngine&&) = delete;
 
-	bool m_initialized = false;
+	bool m_initialized;
+	HWND m_hContainerWnd;
 
-	wil::com_ptr<ICoreWebView2Environment>m_environment; // 环境
-	wil::com_ptr<ICoreWebView2Controller>m_controller; // 控制器
+	wil::com_ptr<ICoreWebView2Environment15>m_environment; // 环境
+	wil::com_ptr<ICoreWebView2Controller4>m_controller; // 控制器
 	wil::com_ptr<ICoreWebView2>m_webview; // 核心视图
 
-	EventRegistrationToken m_TokenNavigationCompleted;
-	EventRegistrationToken m_TokenWebMessageReceived;
+	EventRegistrationToken m_tokenNavigationCompleted;
+	EventRegistrationToken m_tokenWebMessageReceived;
+	EventRegistrationToken m_tokenBrowserProcessExited;
 };

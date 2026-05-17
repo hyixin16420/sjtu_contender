@@ -10,6 +10,12 @@
     <Filter Include="src\Window">
       <UniqueIdentifier>{62b8943c-0e69-4b74-9fc5-0895bb6316b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{7f3167c7-69f8-4584-a136-9c819eb12616}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\opencv2">
+      <UniqueIdentifier>{d56a5183-ea5b-447f-823e-5577b3fb88d6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\TicketEngine.cpp">

@@ -5,18 +5,33 @@
 #include "Window/window_messages.h"
 #include <WebView2EnvironmentOptions.h>
 #include <wil/com.h>
+#include <opencv2/opencv.hpp>
 
 #include <fstream>
 #include <sstream>
-
 using namespace Microsoft::WRL;
 
-TicketEngine& TicketEngine::instance() {
-	static TicketEngine ins;
-	return ins;
+TicketEngine* gTicketEngineInstance = nullptr;
+
+void TicketEngine::create() {
+	if (!gTicketEngineInstance) {
+		gTicketEngineInstance = new TicketEngine;
+	}
+	return;
 }
-TicketEngine::TicketEngine() : m_initialized(false),
-	m_TokenNavigationCompleted(), m_TokenWebMessageReceived()
+void TicketEngine::destroy() {
+	if (gTicketEngineInstance) {
+		delete gTicketEngineInstance;
+		gTicketEngineInstance = nullptr;
+	}
+	return;
+}
+TicketEngine& TicketEngine::instance() {
+	CHECK_FAILURE_BOOL(gTicketEngineInstance);
+	return *gTicketEngineInstance;
+}
+TicketEngine::TicketEngine() : m_initialized(false), m_hContainerWnd(nullptr),
+	m_tokenNavigationCompleted(), m_tokenWebMessageReceived(), m_tokenBrowserProcessExited()
 {
 #ifndef NDEBUG
 	CHECK_FAILURE_BOOL(AllocConsole());
@@ -28,6 +43,10 @@ TicketEngine::TicketEngine() : m_initialized(false),
 #endif
 }
 TicketEngine::~TicketEngine() {
+	m_environment->remove_BrowserProcessExited(m_tokenBrowserProcessExited);
+	m_webview.reset();
+	m_controller.reset();
+	m_environment.reset();
 #ifndef NDEBUG
 	CHECK_FAILURE_BOOL(FreeConsole());
 #endif
@@ -38,16 +57,19 @@ void TicketEngine::InitializeBrowser(HWND browserContainerHwnd) {
 	if (m_initialized) {
 		return;
 	}
+	m_hContainerWnd = browserContainerHwnd;
 
 	auto options = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
+	
 	//把底层引擎跑起来
 	CHECK_FAILURE(CreateCoreWebView2EnvironmentWithOptions(nullptr, nullptr, options.Get(),
 		Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
 			[this, browserContainerHwnd](HRESULT result, ICoreWebView2Environment* env) -> HRESULT {
-				m_environment = env;
+				CHECK_FAILURE_BOOL(env);
+				CHECK_FAILURE(env->QueryInterface(IID_PPV_ARGS(&m_environment)));
 
 				//创建窗口控制器：与UI窗口绑定在一起，生成一个控制器
-				env->CreateCoreWebView2Controller(
+				m_environment->CreateCoreWebView2Controller(
 					browserContainerHwnd, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
 					[this, browserContainerHwnd](HRESULT result, ICoreWebView2Controller* controller) -> HRESULT {
 						if (m_webview) {
@@ -55,8 +77,8 @@ void TicketEngine::InitializeBrowser(HWND browserContainerHwnd) {
 						}
 
 						CHECK_FAILURE_BOOL(controller);
-						(m_controller = controller)->get_CoreWebView2(&m_webview);
-						CHECK_FAILURE_BOOL(m_webview);
+						CHECK_FAILURE(controller->QueryInterface(IID_PPV_ARGS(&m_controller)));
+						CHECK_FAILURE(m_controller->get_CoreWebView2(&m_webview));
 						m_initialized = true;
 
 						// 对webview进行一些设置
@@ -79,7 +101,7 @@ void TicketEngine::InitializeBrowser(HWND browserContainerHwnd) {
 									args->get_IsSuccess(&success);
 									LogOut(L"网页加载完毕！");
 									return S_OK;
-								}).Get(), &m_TokenNavigationCompleted);
+								}).Get(), &m_tokenNavigationCompleted);
 
 						m_webview->add_WebMessageReceived(
 							Callback<ICoreWebView2WebMessageReceivedEventHandler>(
@@ -89,11 +111,19 @@ void TicketEngine::InitializeBrowser(HWND browserContainerHwnd) {
 									// processMessage(&message);
 									webview->PostWebMessageAsString(message.get());
 									return S_OK;
-								}).Get(), &m_TokenWebMessageReceived);
+								}).Get(), &m_tokenWebMessageReceived);
 
 						PostMessage(browserContainerHwnd, WM_WEBVIEWINITIALIZED, 0, 0);
 						return S_OK;
 					}).Get());
+
+				m_environment->add_BrowserProcessExited(
+					Callback<ICoreWebView2BrowserProcessExitedEventHandler>(
+						[this](ICoreWebView2Environment* sender,
+							ICoreWebView2BrowserProcessExitedEventArgs* args) -> HRESULT {
+							PostMessage(m_hContainerWnd, WM_WEBVIEWEXITED, 0, 0);
+							return S_OK;
+						}).Get(), &m_tokenBrowserProcessExited);
 				return S_OK;
 			}).Get()));
 	return;
@@ -110,13 +140,9 @@ void TicketEngine::OnResize(RECT bounds) {
 
 // 窗口关闭时的资源清理
 void TicketEngine::OnClose() {
-	if (m_webview) {
-		m_webview->remove_NavigationCompleted(m_TokenNavigationCompleted);
-		m_webview->remove_WebMessageReceived(m_TokenWebMessageReceived);
-	}
-	m_webview.reset();
-	m_controller.reset();
-	m_environment.reset();
+	m_webview->remove_NavigationCompleted(m_tokenNavigationCompleted);
+	m_webview->remove_WebMessageReceived(m_tokenWebMessageReceived);
+	m_controller->Close();
 	return;
 }
 
@@ -126,6 +152,38 @@ void TicketEngine::NavigateTo(const std::wstring& url) {
 		m_webview->Navigate(url.c_str());
 		LogOut(L"正在跳转至链接：" + url);
 	}
+	return;
+}
+
+// 截图
+void TicketEngine::Capture(cv::Mat& mat) {
+	IStream* piStream = nullptr;
+	CHECK_FAILURE(CreateStreamOnHGlobal(nullptr, TRUE, &piStream));
+	m_webview->CapturePreview(
+		COREWEBVIEW2_CAPTURE_PREVIEW_IMAGE_FORMAT_PNG, piStream,
+		Callback<ICoreWebView2CapturePreviewCompletedHandler>(
+			[this, &mat, piStream](HRESULT result) -> HRESULT {
+				if (FAILED(result)) {
+					LogOut(L"截图失败！");
+					return S_OK;
+				}
+				STATSTG stat = {};
+				piStream->Stat(&stat, STATFLAG_NONAME);
+				ULONG size = stat.cbSize.LowPart;
+
+				// 分配 buffer
+				std::vector<BYTE> buffer(size);
+				LARGE_INTEGER zero = {};
+				piStream->Seek(zero, STREAM_SEEK_SET, nullptr);
+				ULONG readBytes = 0;
+				piStream->Read(buffer.data(), size, &readBytes);
+				piStream->Release();
+
+				mat = cv::imdecode(buffer, cv::IMREAD_COLOR);
+				PostMessage(m_hContainerWnd, WM_WEBVIEWCAPTURECOMPLETED, 0, 0);
+				LogOut(L"截图完成！");
+				return S_OK;
+			}).Get());
 	return;
 }
 
